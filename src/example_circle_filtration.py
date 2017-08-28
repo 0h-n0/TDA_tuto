@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+import scipy.spatial.distance as dist
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -47,22 +47,41 @@ class Simplex(object):
         self.data = data
         self._get_dim()
 
+        self.group = [[] for i in range(self.dimx)]
+        self.max_r = 3.0
+        self.min_r = 0.2
+        self.delta_r = 0.2
+        self.rlist = arange(0.2, 3, 0.2)
+
     def _get_dim(self):
         self.dimx = len(self.data)
         self.dimy = len(self.data[0])
     
     def dim(self):
         return (self.dimx, self.dimy)
+
+    def filtration(self):
+        for idx in range(len(self.data)):
+            grouplist = []
+            for jdx in range(idx+1, len(self.data)):            
+                for r in self.rlist:
+                    if self.data[idx, 0] - self.data[jdx, 0] < r and \
+                       self.data[idx, 1] - self.data[jdx, 1] < r:
+                        length = cdist(self.data[idx], self.data[jdx], 'euclidean')
+                        if length < r:
+                            grouplist.append(jdx)
+            self.group[idx].append(grouplist)
     
 
 if __name__ == '__main__':
-    num = 200
+    num = 50
     theta = np.linspace(0, 2 * np.pi, num)
     x, y = create_random_circle_data(0, 0, 10, 2, theta, num)
     data = np.dstack((x, y))
     data = data[0]
-
     s = Simplex(data)
     s.dim()
+    s.filtration()
+    print(group)
     
 
